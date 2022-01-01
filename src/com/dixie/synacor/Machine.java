@@ -29,16 +29,16 @@ public class Machine {
 
   public void execute() {
     while (executeNext());
-    out.println("Next op to implement: " + memory.get(index - 1));
   }
 
   private boolean executeNext() {
     int op = next();
     return switch (op) {
+      case 0 -> false; // halt
       case 6 -> jump();
       case 19 -> print();
       case 21 -> true; // no-op
-      default -> false;
+      default -> throw new RuntimeException("Op not implemented: " + op);
     };
   }
 

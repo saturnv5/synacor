@@ -1,4 +1,4 @@
-package com.google.synacor;
+package com.dixie.synacor;
 
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -29,7 +29,7 @@ public class Machine {
 
   public void execute() {
     while (executeNext());
-    out.println("Not implemented op: " + memory.get(index - 1));
+    out.println("Next op to implement: " + memory.get(index - 1));
   }
 
   private boolean executeNext() {

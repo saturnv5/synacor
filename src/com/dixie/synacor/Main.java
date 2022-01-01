@@ -1,4 +1,4 @@
-package com.google.synacor;
+package com.dixie.synacor;
 
 import java.io.IOException;
 import java.nio.file.Files;

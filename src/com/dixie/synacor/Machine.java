@@ -1,5 +1,7 @@
 package com.dixie.synacor;
 
+import com.google.common.primitives.Shorts;
+
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -68,7 +70,8 @@ public class Machine {
   private static int[] instructionsFromBytes(byte[] bytes) {
     int[] instructions = new int[bytes.length / 2];
     IntStream.range(0, instructions.length).forEach(
-            i -> instructions[i] = bytes[i * 2] + 256 * bytes[i * 2 + 1]);
+            i -> instructions[i] =
+                    Short.toUnsignedInt(Shorts.fromBytes(bytes[i * 2 + 1], bytes[i * 2])));
     return instructions;
   }
 }

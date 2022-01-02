@@ -12,6 +12,9 @@ import java.util.stream.IntStream;
 public class Machine {
   public static final int MODULUS = Short.MAX_VALUE + 1;
 
+  private static final boolean DEBUG_MODE = true;
+  private static final int DEBUG_R7_OVERRIDE = 1;
+
   private final HashMap<Integer, Integer> memory = new HashMap<>();
   private final ArrayDeque<Integer> stack = new ArrayDeque<>();
   private final int[] registers = new int[8];
@@ -168,6 +171,14 @@ public class Machine {
     if (val < MODULUS) {
       return val;
     } else {
+      if (DEBUG_MODE) {
+        if (val % MODULUS == 7) {
+          System.err.println("r7 read near: " + index);
+          if (index == 5453 || index == 6045) {
+            return DEBUG_R7_OVERRIDE;
+          }
+        }
+      }
       return registers[val % MODULUS];
     }
   }

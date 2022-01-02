@@ -1,10 +1,11 @@
 package com.dixie.synacor;
 
-import com.google.common.primitives.Shorts;
+import com.google.common.primitives.Ints;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.Arrays;
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.stream.IntStream;
 
@@ -12,6 +13,7 @@ public class Machine {
   private static final int MODULUS = Short.MAX_VALUE + 1;
 
   private final HashMap<Integer, Integer> memory = new HashMap<>();
+  private final ArrayDeque<Integer> stack = new ArrayDeque<>();
   private final int[] registers = new int[8];
 
   private final InputStream in;
@@ -29,29 +31,132 @@ public class Machine {
     IntStream.range(0, instructions.length).forEach(i -> memory.put(i, instructions[i]));
   }
 
-  public void execute() {
+  public void execute() throws IOException {
     while (executeNext());
   }
 
-  private boolean executeNext() {
+  private boolean executeNext() throws IOException {
     int op = next();
-    return switch (op) {
-      case 0 -> false; // halt
-      case 6 -> jump();
-      case 19 -> print();
-      case 21 -> true; // no-op
+    switch (op) {
+      case 0 -> { return false; } // halt
+      case 1 -> set();
+      case 2 -> push();
+      case 3 -> pop();
+      case 4 -> eq();
+      case 5 -> gt();
+      case 6 -> jmp();
+      case 7 -> jt();
+      case 8 -> jf();
+      case 9 -> add();
+      case 10 -> mult();
+      case 11 -> mod();
+      case 12 -> and();
+      case 13 -> or();
+      case 14 -> not();
+      case 15 -> rmem();
+      case 16 -> wmem();
+      case 17 -> call();
+      case 18 -> { return ret(); }
+      case 19 -> out();
+      case 20 -> in();
+      case 21 -> { return true; } // no-op
       default -> throw new RuntimeException("Op not implemented: " + op);
-    };
+    }
+    return true;
   }
 
-  private boolean jump() {
+  private void set() {
+    put(next(), nextArg());
+  }
+
+  private void push() {
+    stack.push(nextArg());
+  }
+
+  private void pop() {
+    put(next(), stack.pop());
+  }
+
+  private void eq() {
+    put(next(), nextArg() == nextArg());
+  }
+
+  private void gt() {
+    put(next(), nextArg() > nextArg());
+  }
+
+  private void jmp() {
     index = nextArg();
+  }
+
+  private void jt() {
+    int val = nextArg();
+    int jumpTo = nextArg();
+    if (val != 0) {
+      index = jumpTo;
+    }
+  }
+
+  private void jf() {
+    int val = nextArg();
+    int jumpTo = nextArg();
+    if (val == 0) {
+      index = jumpTo;
+    }
+  }
+
+  private void add() {
+    put(next(), nextArg() + nextArg());
+  }
+
+  private void mult() {
+    put(next(), nextArg() * nextArg());
+  }
+
+  private void mod() {
+    put(next(), nextArg() % nextArg());
+  }
+
+  private void and() {
+    put(next(), nextArg() & nextArg());
+  }
+
+  private void or() {
+    put(next(), nextArg() | nextArg());
+  }
+
+  private void not() {
+    put(next(), nextArg() ^ ((1 << 15) - 1));
+  }
+
+  private void rmem() {
+    put(next(), memory.get(nextArg()));
+  }
+
+  private void wmem() {
+    put(next(), nextArg());
+  }
+
+  private void call() {
+    int jumpTo = nextArg();
+    stack.push(index);
+    index = jumpTo;
+  }
+
+  private boolean ret() {
+    if (stack.isEmpty()) {
+      return false;
+    }
+    index = stack.pop();
     return true;
   }
 
-  private boolean print() {
+  private void out() {
     out.print((char) nextArg());
-    return true;
+  }
+
+  private void in() throws IOException {
+    put(next(), in.read());
   }
 
   private int next() {
@@ -67,11 +172,27 @@ public class Machine {
     }
   }
 
+  private void put(int address, boolean val) {
+    put(address, val ? 1 : 0);
+  }
+
+  private void put(int address, int val) {
+    System.out.println("put: " + address + " = " + val);
+    if (val >= MODULUS) {
+      val %= MODULUS;
+    }
+    if (address < MODULUS) {
+      memory.put(address, val);
+    } else {
+      registers[address % MODULUS] = val;
+    }
+  }
+
   private static int[] instructionsFromBytes(byte[] bytes) {
     int[] instructions = new int[bytes.length / 2];
+    byte empty = (byte) 0;
     IntStream.range(0, instructions.length).forEach(
-            i -> instructions[i] =
-                    Short.toUnsignedInt(Shorts.fromBytes(bytes[i * 2 + 1], bytes[i * 2])));
+            i -> instructions[i] = Ints.fromBytes(empty, empty, bytes[i * 2 + 1], bytes[i * 2]));
     return instructions;
   }
 }

@@ -106,11 +106,11 @@ public class Machine {
   }
 
   private void add() {
-    put(next(), nextArg() + nextArg());
+    put(next(), (nextArg() + nextArg()) % MODULUS);
   }
 
   private void mult() {
-    put(next(), nextArg() * nextArg());
+    put(next(), (nextArg() * nextArg()) % MODULUS);
   }
 
   private void mod() {
@@ -177,10 +177,6 @@ public class Machine {
   }
 
   private void put(int address, int val) {
-    System.out.println("put: " + address + " = " + val);
-    if (val >= MODULUS) {
-      val %= MODULUS;
-    }
     if (address < MODULUS) {
       memory.put(address, val);
     } else {

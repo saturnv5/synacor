@@ -126,7 +126,7 @@ public class Machine {
   }
 
   private void not() {
-    put(next(), nextArg() ^ ((1 << 15) - 1));
+    put(next(), ~nextArg() & 0x7FFF);
   }
 
   private void rmem() {
@@ -134,7 +134,7 @@ public class Machine {
   }
 
   private void wmem() {
-    put(next(), nextArg());
+    put(nextArg(), nextArg());
   }
 
   private void call() {

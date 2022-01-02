@@ -1,9 +1,14 @@
 package com.dixie.synacor;
 
-import java.util.ArrayDeque;
+import java.awt.*;
+import java.util.HashMap;
 
 public class TeleporterPuzzle {
   private int r0 = 4, r1 = 1, r2, r3, r4, r5, r6, r7;
+
+  TeleporterPuzzle(int r7) {
+    this.r7 = r7;
+  }
 
   /**
    * 5483: set r0 4
@@ -27,32 +32,32 @@ public class TeleporterPuzzle {
    * 6065: call 6027
    * 6067: ret
    */
-  private void originalMethodA() {
+  private void methodA() {
     if (r0 == 0) {
       r0 = r1 + 1;
     } else if (r1 == 0) {
       r0--;
       r1 = r7;
-      originalMethodA();
+      methodA();
     } else {
       int tmp = r0;
       r1--;
-      originalMethodA();
+      methodA();
       r1 = r0;
       r0 = tmp;
       r0--;
-      originalMethodA();
+      methodA();
     }
   }
 
   /** Convert tail-recursion to loop; use r0 as input and output value. */
-  private int originalMethodB(int x) {
+  private int methodB(int x) {
     while (x > 0) {
       if (r1 == 0) {
         r1 = r7;
       } else {
         r1--;
-        r1 = originalMethodB(x);
+        r1 = methodB(x);
       }
       x--;
     }
@@ -60,15 +65,63 @@ public class TeleporterPuzzle {
   }
 
   /** Use r1 as second input value. */
-  private int originalMethodC(int x, int y) {
+  private int methodC(int x, int y) {
     while (x > 0) {
       if (y == 0) {
         y = r7;
       } else {
-        y = originalMethodC(x, y - 1);
+        y = methodC(x, y - 1);
       }
       x--;
     }
     return y + 1;
+  }
+
+  /** Same thing, but based on methodA again as the while-loop is confusing. */
+  private int methodD(int x, int y) {
+    if (x == 0) {
+      return y + 1;
+    } else if (y == 0) {
+      y = r7;
+    } else {
+      y = methodD(x, y - 1);
+    }
+    return methodD(x - 1, y);
+  }
+
+  private final HashMap<Point, Integer> cache = new HashMap<>();
+
+  /** Same thing, but with memoization. */
+  public int methodE(int x, int y) {
+    Point key = new Point(x, y);
+    Integer ans = cache.get(key);
+    if (ans != null) {
+      return ans;
+    }
+    if (x == 0) {
+      return y + 1;
+    } else if (y == 0) {
+      y = r7;
+    } else {
+      y = methodE(x, y - 1);
+    }
+    ans = methodE(x - 1, y);
+    cache.put(key, ans);
+    return ans;
+  }
+
+  public static void main(String[] args) {
+    // 5483: set r0 4
+    // 5486: set r1 1
+    // 5489: call 6027
+    // 5491: eq r1 r0 6
+    // 5495: jf r1 5579
+    for (int r7 = 0; r7 < Machine.MODULUS; r7++) {
+      int output = new TeleporterPuzzle(r7).methodE(4, 1);
+      System.out.println(String.format("output = %d, when r7 = %d", output, r7));
+      if (output == 6) {
+        break;
+      }
+    }
   }
 }

@@ -18,7 +18,7 @@ public class CoinSolver {
 
     private final int value;
 
-    private Coin(int value) {
+    Coin(int value) {
       this.value = value;
     }
   }

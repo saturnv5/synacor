@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class TextAdventure {
-  private static final String FILE_PATH = "./res/challenge.bin";
+  public static final String FILE_PATH = "./res/challenge.bin";
 
   public static void main(String[] args) throws IOException {
     byte[] bytes = Files.readAllBytes(Paths.get(FILE_PATH));

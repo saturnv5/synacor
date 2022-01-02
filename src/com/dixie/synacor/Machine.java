@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.stream.IntStream;
 
 public class Machine {
-  private static final int MODULUS = Short.MAX_VALUE + 1;
+  public static final int MODULUS = Short.MAX_VALUE + 1;
 
   private final HashMap<Integer, Integer> memory = new HashMap<>();
   private final ArrayDeque<Integer> stack = new ArrayDeque<>();
@@ -184,7 +184,7 @@ public class Machine {
     }
   }
 
-  private static int[] instructionsFromBytes(byte[] bytes) {
+  public static int[] instructionsFromBytes(byte[] bytes) {
     int[] instructions = new int[bytes.length / 2];
     byte empty = (byte) 0;
     IntStream.range(0, instructions.length).forEach(

@@ -99,7 +99,9 @@ public class TeleporterPuzzle {
       return ans;
     }
     if (x == 0) {
-      return y + 1;
+      ans = y + 1;
+      cache.put(key, ans);
+      return ans;
     } else if (y == 0) {
       y = r7;
     } else {
@@ -115,9 +117,8 @@ public class TeleporterPuzzle {
     // 5486: set r1 1
     // 5489: call 6027
     // 5491: eq r1 r0 6
-    // 5495: jf r1 5579
     for (int r7 = 0; r7 < Machine.MODULUS; r7++) {
-      int output = new TeleporterPuzzle(r7).methodE(4, 1);
+      int output = new TeleporterPuzzle(r7).methodE(4, 1) % Machine.MODULUS;
       System.out.println(String.format("output = %d, when r7 = %d", output, r7));
       if (output == 6) {
         break;

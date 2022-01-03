@@ -26,3 +26,7 @@ west
 north
 north
 east
+vault
+look mirror
+take mirror
+use mirror

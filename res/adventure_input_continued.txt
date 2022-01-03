@@ -1,0 +1,28 @@
+use teleporter
+north
+north
+north
+north
+north
+north
+north
+east
+take journal
+west
+north
+look journal
+north
+look orb
+take orb
+north
+east
+east
+north
+west
+south
+east
+east
+west
+north
+north
+east

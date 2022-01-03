@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.stream.IntStream;
 
 public class Machine {
@@ -17,12 +18,13 @@ public class Machine {
   private final HashMap<Integer, Integer> memory = new HashMap<>();
   private final ArrayDeque<Integer> stack = new ArrayDeque<>();
   private final int[] registers = new int[8];
+  private final HashSet<Integer> skips = new HashSet<>();
 
   private final InputStream in;
   private final PrintStream out;
 
   private int index = 0;
-  private int nextInstructionIndex = -1;
+  private boolean skipMode = false;
 
   public Machine(InputStream in, PrintStream out, byte[] instructions) {
     this(in, out, instructionsFromBytes(instructions));
@@ -36,10 +38,7 @@ public class Machine {
 
   public void execute() throws IOException {
     while (executeNext()) {
-      if (nextInstructionIndex >= 0) {
-        index = nextInstructionIndex;
-        nextInstructionIndex = -1;
-      }
+      skipMode = skips.contains(index);
     }
   }
 
@@ -78,11 +77,19 @@ public class Machine {
   }
 
   private void push() {
-    stack.push(nextArg());
+    int val = nextArg();
+    if (skipMode) {
+      return;
+    }
+    stack.push(val);
   }
 
   private void pop() {
-    put(next(), stack.pop());
+    int address = next();
+    if (skipMode) {
+      return;
+    }
+    put(address, stack.pop());
   }
 
   private void eq() {
@@ -94,14 +101,14 @@ public class Machine {
   }
 
   private void jmp() {
-    index = nextArg();
+    jumpTo(nextArg());
   }
 
   private void jt() {
     int val = nextArg();
     int jumpTo = nextArg();
     if (val != 0) {
-      index = jumpTo;
+      jumpTo(jumpTo);
     }
   }
 
@@ -109,7 +116,7 @@ public class Machine {
     int val = nextArg();
     int jumpTo = nextArg();
     if (val == 0) {
-      index = jumpTo;
+      jumpTo(jumpTo);
     }
   }
 
@@ -147,15 +154,21 @@ public class Machine {
 
   private void call() {
     int jumpTo = nextArg();
+    if (skipMode) {
+      return;
+    }
     stack.push(index);
-    index = jumpTo;
+    jumpTo(jumpTo);
   }
 
   private boolean ret() {
+    if (skipMode) {
+      return true;
+    }
     if (stack.isEmpty()) {
       return false;
     }
-    index = stack.pop();
+    jumpTo(stack.pop());
     return true;
   }
 
@@ -190,6 +203,9 @@ public class Machine {
   }
 
   void put(int address, int val) {
+    if (skipMode) {
+      return;
+    }
     if (address < MODULUS) {
       memory.put(address, val);
     } else {
@@ -205,8 +221,15 @@ public class Machine {
     }
   }
 
-  void setNextInstructionIndex(int index) {
-    nextInstructionIndex = index;
+  void skipInstruction(int index) {
+    skips.add(index);
+  }
+
+  private void jumpTo(int index) {
+    if (skipMode) {
+      return;
+    }
+    this.index = index;
   }
 
   public static int[] instructionsFromBytes(byte[] bytes) {

@@ -56,7 +56,7 @@ public class TextAdventureDebugger {
         case "get_mem" -> getMem(cmd[1]);
         case "set_reg" -> setReg(cmd[1], cmd[2]);
         case "set_mem" -> setMem(cmd[1], cmd[2]);
-        case "jump_to" -> jumpTo(cmd[1]);
+        case "skip" -> skip(cmd[1]);
         default -> false;
       };
     } catch (Exception e) {
@@ -95,11 +95,10 @@ public class TextAdventureDebugger {
     return true;
   }
 
-  private boolean jumpTo(String address) throws IOException {
+  private boolean skip(String address) {
     int index = Integer.parseInt(address);
-    machine.setNextInstructionIndex(index);
-    System.err.println("jumping to " + index);
-    pipedOutput.write('\n'); // advance the machine
+    machine.skipInstruction(index);
+    System.err.printf("instruction %d will be skipped%n", index);
     return true;
   }
 }

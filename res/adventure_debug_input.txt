@@ -1,0 +1,63 @@
+take tablet
+use tablet
+doorway
+north
+north
+bridge
+continue
+down
+east
+take empty lantern
+west
+west
+passage
+ladder
+west
+south
+north
+take can
+use can
+west
+ladder
+darkness
+use lantern
+continue
+west
+west
+west
+west
+north
+look red coin
+take red coin
+north
+east
+look concave coin
+take concave coin
+down
+look corroded coin
+take corroded coin
+up
+west
+west
+look blue coin
+take blue coin
+up
+look shiny coin
+take shiny coin
+down
+east
+use blue coin
+use red coin
+use shiny coin
+use concave coin
+use corroded coin
+north
+take teleporter
+use teleporter
+look business card
+take business card
+take strange book
+look strange book
+set_reg 7 25734
+set_reg 0 6
+jump_to 5491

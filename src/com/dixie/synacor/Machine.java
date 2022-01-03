@@ -12,8 +12,7 @@ import java.util.stream.IntStream;
 public class Machine {
   public static final int MODULUS = Short.MAX_VALUE + 1;
 
-  private static final boolean DEBUG_MODE = true;
-  private static final int DEBUG_R7_OVERRIDE = 1;
+  private static final boolean R7_LOCATOR_MODE = false;
 
   private final HashMap<Integer, Integer> memory = new HashMap<>();
   private final ArrayDeque<Integer> stack = new ArrayDeque<>();
@@ -23,6 +22,7 @@ public class Machine {
   private final PrintStream out;
 
   private int index = 0;
+  private int nextInstructionIndex = -1;
 
   public Machine(InputStream in, PrintStream out, byte[] instructions) {
     this(in, out, instructionsFromBytes(instructions));
@@ -35,7 +35,12 @@ public class Machine {
   }
 
   public void execute() throws IOException {
-    while (executeNext());
+    while (executeNext()) {
+      if (nextInstructionIndex >= 0) {
+        index = nextInstructionIndex;
+        nextInstructionIndex = -1;
+      }
+    }
   }
 
   private boolean executeNext() throws IOException {
@@ -171,12 +176,9 @@ public class Machine {
     if (val < MODULUS) {
       return val;
     } else {
-      if (DEBUG_MODE) {
+      if (R7_LOCATOR_MODE) {
         if (val % MODULUS == 7) {
           System.err.println("r7 read near: " + index);
-          if (index == 5453 || index == 6045) {
-            return DEBUG_R7_OVERRIDE;
-          }
         }
       }
       return registers[val % MODULUS];
@@ -187,12 +189,24 @@ public class Machine {
     put(address, val ? 1 : 0);
   }
 
-  private void put(int address, int val) {
+  void put(int address, int val) {
     if (address < MODULUS) {
       memory.put(address, val);
     } else {
       registers[address % MODULUS] = val;
     }
+  }
+
+  int get(int address) {
+    if (address < MODULUS) {
+      return memory.get(address);
+    } else {
+      return registers[address % MODULUS];
+    }
+  }
+
+  void setNextInstructionIndex(int index) {
+    nextInstructionIndex = index;
   }
 
   public static int[] instructionsFromBytes(byte[] bytes) {
